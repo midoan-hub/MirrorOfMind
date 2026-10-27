@@ -1,0 +1,6 @@
+{
+  "name": "Sổ Tay Tâm Trí - The 3 Questions",
+  "description": "Khám phá bản ngã, tình yêu và bạn đời lý tưởng qua 3 câu hỏi tiềm thức với giao diện sổ tay viết tay mềm mại, ấm áp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

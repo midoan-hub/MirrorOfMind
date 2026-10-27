@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sổ Tay Tâm Trí | The 3 Questions Game</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Hỗ trợ tiếng Việt tuyệt đối với các nét chữ mềm mại, bo tròn (Mali & Nunito & Itim) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Itim&family=Mali:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Patrick+Hand&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'hand': ['"Nunito"', '"Quicksand"', 'sans-serif'],
+                        'doodle': ['"Mali"', '"Itim"', 'cursive', 'sans-serif'],
+                    },
+                    colors: {
+                        paper: '#faf7f2',
+                        ink: '#2b2420',
+                        error: '#e63946'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --splash-color: transparent;
+        }
+
+        /* Base Styles & Dot Grid Background */
+        body {
+            background-color: #f9f8f6;
+            color: #2b2b2b;
+            /* Lưới chấm Dot Grid */
+            background-image: radial-gradient(#ccc 1px, transparent 1px);
+            background-size: 24px 24px;
+            background-position: center top;
+            overflow-x: hidden;
+        }
+
+        /* Nút bấm nét xệch xoạc */
+        .btn-doodle {
+            border: 2px solid #2b2b2b;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            background: #fff;
+            position: relative;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
+        }
+        .btn-doodle:hover {
+            background: #f0f0f0;
+            transform: rotate(-1deg) scale(1.02);
+            border-radius: 15px 255px 15px 225px/225px 15px 255px 15px;
+            box-shadow: 3px 4px 0px rgba(0,0,0,0.15);
+        }
+        .btn-doodle:active {
+            transform: scale(0.95);
+            box-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+        }
+
+        /* Khung viền vẽ tay */
+        .box-doodle {
+            border: 2px solid #2b2b2b;
+            border-radius: 255px 25px 225px 25px/25px 225px 25px 255px;
+            background: #fff;
+            position: relative;
+            box-shadow: 4px 5px 0px rgba(0,0,0,0.08);
+        }
+
+        /* Ô nhập liệu */
+        .input-doodle {
+            border: none;
+            border-bottom: 2px dashed #888;
+            background: transparent;
+            outline: none;
+            text-align: center;
+            padding: 4px 8px;
+            transition: all 0.3s ease;
+        }
+        .input-doodle:focus {
+            border-bottom: 2px solid #2b2b2b;
+            transform: translateY(-2px);
+        }
+        .input-doodle::placeholder {
+            color: #aaa;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+        }
+
+        /* Khung báo lỗi xệch xoạc */
+        .error-doodle {
+            border: 2px dashed #e63946;
+            border-radius: 15px 225px 15px 255px/255px 15px 225px 15px;
+            background: #fff0f0;
+            color: #e63946;
+            display: none;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Animation chuyển trang */
+        .page-fade {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            visibility: hidden;
+        }
+        .page-fade.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            position: relative;
+            visibility: visible;
+        }
+
+        /* Vệt màu highlight ở trang cuối */
+        .splash-highlight {
+            position: relative;
+            z-index: 1;
+        }
+        .splash-highlight::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: -5px;
+            right: -5px;
+            height: 40%;
+            background-color: var(--splash-color, transparent);
+            opacity: 0.4;
+            z-index: -1;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            transform: rotate(-1.5deg);
+            transition: background-color 1.5s ease;
+        }
+
+        /* Họa tiết trang trí chung */
+        .doodle-deco {
+            position: absolute;
+            stroke: #2b2b2b;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* Keyframes */
+        @keyframes scribble {
+            0% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+            100% { transform: rotate(-2deg); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px) rotate(-1deg); }
+            75% { transform: translateX(5px) rotate(1deg); }
+        }
+        @keyframes spin-doodle {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-scribble {
+            animation: scribble 3s infinite ease-in-out;
+        }
+        .animate-spin-doodle {
+            animation: spin-doodle 2s linear infinite;
+        }
+    </style>
+</head>
+<body class="font-hand min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 text-xl relative">
+
+    <!-- Họa tiết trang trí nền -->
+    <svg class="doodle-deco top-10 left-10 w-12 h-12 animate-scribble hidden md:block" viewBox="0 0 50 50">
+        <path d="M25 5 L28 20 L45 22 L30 30 L32 45 L25 35 L18 45 L20 30 L5 22 L22 20 Z" />
+    </svg>
+    <svg class="doodle-deco bottom-20 right-10 w-16 h-16 hidden md:block" viewBox="0 0 50 50">
+        <path d="M10 40 Q 25 10 40 40 T 10 40" />
+        <path d="M20 40 L25 30 L30 40" />
+    </svg>
+
+    <!-- Container Sổ Tay -->
+    <main class="w-full max-w-2xl mx-auto relative min-h-[550px] flex flex-col justify-center">
+
+        <!-- Hộp thoại báo lỗi chung -->
+        <div id="globalError" class="error-doodle p-3 mb-6 text-center font-bold text-lg shadow-sm mx-auto max-w-sm w-full">
+            <span id="globalErrorText">Vui lòng điền đủ thông tin!</span>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MÀN HÌNH 0: INTRO -->
+        <!-- ========================================== -->
+        <section id="stage0" class="page-fade active w-full text-center space-y-8 py-8">
+            <div class="relative inline-block animate-scribble">
+                <svg class="w-24 h-24 mx-auto stroke-ink fill-none stroke-[2.5]" viewBox="0 0 100 100" stroke-linecap="round">
+                    <path d="M50 50 m -20 0 a 20 20 0 1 1 40 0 a 25 25 0 1 1 -50 0 a 30 30 0 1 1 60 0 a 35 35 0 1 1 -70 0" />
+                </svg>
+            </div>
+            
+            <div class="space-y-3">
+                <h1 class="font-doodle text-6xl sm:text-7xl font-bold tracking-tight text-ink">Sổ Tay Tâm Trí</h1>
+                <div class="relative w-48 mx-auto">
+                    <!-- Nét gạch chân doodle -->
+                    <svg class="w-full h-4 stroke-ink fill-none stroke-2" viewBox="0 0 100 10" preserveAspectRatio="none">
+                        <path d="M5 5 Q 50 0 95 8" />
+                        <path d="M10 8 Q 50 12 90 4" />
+                    </svg>
+                </div>
+            </div>
+
+            <p class="text-2xl text-gray-700 max-w-md mx-auto leading-relaxed mt-6">
+                "Hãy viết theo trực giác đầu tiên của bạn."
+            </p>
+
+            <button onclick="nextStage(1)" class="btn-doodle px-8 py-3 text-2xl font-doodle font-bold mt-10 inline-flex items-center gap-2 group mx-auto">
+                Mở trang đầu tiên
+                <svg class="w-6 h-6 stroke-ink fill-none stroke-2 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14M13 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MÀN HÌNH 1: MÀU SẮC -->
+        <!-- ========================================== -->
+        <section id="stage1" class="page-fade w-full space-y-8 py-4 px-2">
+            <div class="text-right text-gray-400 font-doodle text-xl mb-4">Trang 1 / 3</div>
+            
+            <div class="box-doodle p-6 sm:p-8 space-y-8">
+                <div>
+                    <label class="block text-3xl font-doodle font-bold mb-4 text-ink">1. Màu sắc bạn yêu thích nhất là gì?</label>
+                    <input type="text" id="colorInput" placeholder="Ví dụ: Xanh rêu, Vàng nắng..." class="input-doodle w-full font-doodle text-3xl text-ink placeholder-gray-300">
+                </div>
+                
+                <div class="pt-4">
+                    <label class="block text-2xl mb-4 text-gray-700 flex items-center gap-2">
+                        <svg class="w-5 h-5 stroke-ink fill-none stroke-2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                        Viết 3 tính từ miêu tả vì sao bạn thích màu đó:
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <input type="text" id="colorAdj1" placeholder="Tính từ 1 (VD: ấm áp)" class="input-doodle w-full font-doodle text-2xl">
+                        <input type="text" id="colorAdj2" placeholder="Tính từ 2 (VD: bí ẩn)" class="input-doodle w-full font-doodle text-2xl">
+                        <input type="text" id="colorAdj3" placeholder="Tính từ 3 (VD: tự do)" class="input-doodle w-full font-doodle text-2xl">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-4">
+                <button onclick="nextStage(2, 'color')" class="btn-doodle px-6 py-2 text-xl font-bold flex items-center gap-2">
+                    Lật trang <svg class="w-5 h-5 stroke-ink fill-none stroke-2" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MÀN HÌNH 2: CON VẬT -->
+        <!-- ========================================== -->
+        <section id="stage2" class="page-fade w-full space-y-8 py-4 px-2">
+            <div class="text-right text-gray-400 font-doodle text-xl mb-4">Trang 2 / 3</div>
+            
+            <div class="box-doodle p-6 sm:p-8 space-y-8">
+                <div>
+                    <label class="block text-3xl font-doodle font-bold mb-4 text-ink">2. Con vật bạn yêu thích nhất là gì?</label>
+                    <input type="text" id="animalInput" placeholder="Ví dụ: Chó sói, Mèo lười..." class="input-doodle w-full font-doodle text-3xl text-ink placeholder-gray-300">
+                </div>
+                
+                <div class="pt-4">
+                    <label class="block text-2xl mb-4 text-gray-700 flex items-center gap-2">
+                        <svg class="w-5 h-5 stroke-ink fill-none stroke-2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                        3 tính từ miêu tả tính cách/vẻ đẹp của nó:
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <input type="text" id="animalAdj1" placeholder="Tính từ 1" class="input-doodle w-full font-doodle text-2xl">
+                        <input type="text" id="animalAdj2" placeholder="Tính từ 2" class="input-doodle w-full font-doodle text-2xl">
+                        <input type="text" id="animalAdj3" placeholder="Tính từ 3" class="input-doodle w-full font-doodle text-2xl">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between pt-4">
+                <button onclick="nextStage(1)" class="text-gray-500 hover:text-ink transition px-4 text-lg underline decoration-dashed">
+                    Quay lại
+                </button>
+                <button onclick="nextStage(3, 'animal')" class="btn-doodle px-6 py-2 text-xl font-bold flex items-center gap-2">
+                    Lật trang <svg class="w-5 h-5 stroke-ink fill-none stroke-2" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MÀN HÌNH 3: DẠNG NƯỚC -->
+        <!-- ========================================== -->
+        <section id="stage3" class="page-fade w-full space-y-8 py-4 px-2">
+            <div class="text-right text-gray-400 font-doodle text-xl mb-4">Trang 3 / 3</div>
+            
+            <div class="box-doodle p-6 sm:p-8 space-y-8">
+                <div>
+                    <label class="block text-3xl font-doodle font-bold mb-2 text-ink">3. Dạng nước bạn thích nhất?</label>
+                    <p class="text-base text-gray-500 mb-4 font-hand">(VD: Đại dương mênh mông, suối nhỏ, mưa rào, sương mù, hơi nước...)</p>
+                    <input type="text" id="waterInput" placeholder="Dạng nước của bạn..." class="input-doodle w-full font-doodle text-3xl text-ink placeholder-gray-300">
+                </div>
+                
+                <div class="pt-4">
+                    <label class="block text-2xl mb-4 text-gray-700 flex items-center gap-2">
+                        <svg class="w-5 h-5 stroke-ink fill-none stroke-2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                        3 tính từ miêu tả cảm giác của dạng nước đó:
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <input type="text" id="waterAdj1" placeholder="Tính từ 1" class="input-doodle w-full font-doodle text-2xl">
+                        <input type="text" id="waterAdj2" placeholder="Tính từ 2" class="input-doodle w-full font-doodle text-2xl">
+                        <input type="text" id="waterAdj3" placeholder="Tính từ 3" class="input-doodle w-full font-doodle text-2xl">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between pt-4 items-center">
+                <button onclick="nextStage(2)" class="text-gray-500 hover:text-ink transition px-4 text-lg underline decoration-dashed">
+                    Quay lại
+                </button>
+                <button onclick="processToLoading()" class="btn-doodle px-8 py-3 text-2xl font-doodle font-bold flex items-center gap-2 bg-ink text-paper hover:bg-gray-800 hover:text-white border-ink">
+                    Giải Mã Sổ Tay
+                    <svg class="w-6 h-6 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3 9h9l-7.5 5.5L19.5 22 12 16.5 4.5 22l3-5.5L0 11h9z"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MÀN HÌNH LOADING (Đang phân tích) -->
+        <!-- ========================================== -->
+        <section id="stageLoading" class="page-fade w-full text-center space-y-6 py-16">
+            <div class="relative w-20 h-20 mx-auto">
+                <svg class="animate-spin-doodle w-full h-full stroke-ink fill-none stroke-[2]" viewBox="0 0 100 100">
+                    <path d="M50 10 A 40 40 0 1 1 10 50" stroke-dasharray="20 10" />
+                    <path d="M50 20 L50 30 M80 50 L70 50 M50 80 L50 70 M20 50 L30 50" />
+                </svg>
+            </div>
+            <h2 class="font-doodle text-4xl text-ink font-bold animate-pulse">Đang phác họa tiềm thức...</h2>
+            <p class="text-gray-500 font-hand text-xl">Đợi một chút nhé, mực đang khô...</p>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MÀN HÌNH KẾT QUẢ (Mindmap) -->
+        <!-- ========================================== -->
+        <section id="stageResult" class="page-fade w-full space-y-6 py-4">
+            
+            <div class="text-center relative pb-4">
+                <h2 class="font-doodle text-5xl sm:text-6xl font-bold tracking-tight inline-block relative px-4 text-ink">
+                    Bức Tranh Tâm Trí
+                </h2>
+                <div class="w-48 mx-auto mt-2 opacity-50">
+                    <svg class="w-full h-3 stroke-ink fill-none stroke-2" viewBox="0 0 100 10" preserveAspectRatio="none">
+                        <path d="M0 5 Q 25 0 50 5 T 100 5" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Thẻ 1: Bản Ngã -->
+                <div class="box-doodle p-5 sm:p-6 bg-white relative overflow-hidden">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-full border-2 border-ink flex items-center justify-center font-doodle font-bold text-xl">1</div>
+                        <h3 class="font-bold text-2xl font-doodle text-ink">Bản ngã thật sự</h3>
+                    </div>
+                    <p class="text-gray-700 text-xl leading-relaxed ml-11">
+                        Lựa chọn <span class="font-doodle text-2xl font-bold splash-highlight px-1" id="resColorWord">...</span> cho thấy bạn nhìn nhận con người thật của mình mang nét: 
+                        <strong class="text-ink font-doodle text-2xl ml-1" id="resColorAdjs">...</strong>.
+                    </p>
+                </div>
+
+                <!-- Thẻ 2: Người Bạn Đời -->
+                <div class="box-doodle p-5 sm:p-6 bg-white relative overflow-hidden">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-full border-2 border-ink flex items-center justify-center font-doodle font-bold text-xl">2</div>
+                        <h3 class="font-bold text-2xl font-doodle text-ink">Người bạn đời lý tưởng</h3>
+                    </div>
+                    <p class="text-gray-700 text-xl leading-relaxed ml-11">
+                        Thông qua hình ảnh <span class="font-bold font-doodle text-2xl px-1 border-b-2 border-dashed border-ink" id="resAnimalWord">...</span>, 
+                        sâu thẳm bạn khao khát một người đồng hành: 
+                        <strong class="text-ink font-doodle text-2xl ml-1" id="resAnimalAdjs">...</strong>.
+                    </p>
+                </div>
+
+                <!-- Thẻ 3: Tình Yêu -->
+                <div class="box-doodle p-5 sm:p-6 bg-white relative overflow-hidden">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-full border-2 border-ink flex items-center justify-center font-doodle font-bold text-xl">3</div>
+                        <h3 class="font-bold text-2xl font-doodle text-ink">Tình yêu & Thân mật</h3>
+                    </div>
+                    <p class="text-gray-700 text-xl leading-relaxed ml-11">
+                        Cảm giác về <span class="font-bold font-doodle text-2xl px-1 border-b-2 border-dashed border-ink" id="resWaterWord">...</span> 
+                        chính là cách bạn khao khát được yêu: 
+                        <strong class="text-ink font-doodle text-2xl ml-1" id="resWaterAdjs">...</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Nút chơi lại -->
+            <div class="pt-8 text-center pb-8">
+                <button onclick="restartBook()" class="text-gray-500 hover:text-ink transition flex items-center justify-center gap-2 mx-auto text-xl font-bold group">
+                    <svg class="w-5 h-5 stroke-current fill-none stroke-2 group-hover:-rotate-90 transition-transform" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    <span class="border-b-2 border-dashed border-gray-400 group-hover:border-ink">Lật sang trang mới (Chơi lại)</span>
+                </button>
+            </div>
+            
+        </section>
+    </main>
+
+    <script>
+        // Data Store
+        let answers = {
+            color: { text: "", adjs: [] },
+            animal: { text: "", adjs: [] },
+            water: { text: "", adjs: [] }
+        };
+
+        const errorBox = document.getElementById('globalError');
+        const errorText = document.getElementById('globalErrorText');
+        
+        function showError(msg) {
+            errorText.innerText = msg;
+            errorBox.style.display = 'block';
+            // Tắt thông báo sau 4 giây
+            setTimeout(() => {
+                errorBox.style.display = 'none';
+            }, 4000);
+        }
+
+        function hideError() {
+            errorBox.style.display = 'none';
+        }
+
+        // Hàm kiểm tra form theo bước
+        function validateStep(stepName) {
+            hideError();
+            if (stepName === 'color') {
+                const val = document.getElementById("colorInput").value.trim();
+                const a1 = document.getElementById("colorAdj1").value.trim();
+                if(!val || !a1) {
+                    showError("Bạn ơi, nhớ điền Tên màu sắc và ít nhất 1 tính từ nhé!");
+                    return false;
+                }
+            } else if (stepName === 'animal') {
+                const val = document.getElementById("animalInput").value.trim();
+                const a1 = document.getElementById("animalAdj1").value.trim();
+                if(!val || !a1) {
+                    showError("Đừng để giấy trắng! Viết tên con vật và 1 tính từ vào nhé.");
+                    return false;
+                }
+            } else if (stepName === 'water') {
+                const val = document.getElementById("waterInput").value.trim();
+                const a1 = document.getElementById("waterAdj1").value.trim();
+                if(!val || !a1) {
+                    showError("Nét bút cuối cùng rồi, điền nốt Dạng nước và tính từ nha!");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Chuyển trang cơ bản
+        function nextStage(targetIndex, currentStepName = null) {
+            if (currentStepName && !validateStep(currentStepName)) {
+                return; // Dừng lại nếu lỗi
+            }
+            hideError();
+            switchPages(targetIndex);
+        }
+
+        function switchPages(targetIndex) {
+            const pages = document.querySelectorAll('.page-fade');
+            pages.forEach(p => p.classList.remove('active'));
+            
+            const targetPage = document.getElementById(`stage${targetIndex}`);
+            if(targetPage) {
+                targetPage.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Logic sang Loading và sau đó là Result
+        function processToLoading() {
+            if (!validateStep('water')) return;
+            
+            // Thu thập toàn bộ dữ liệu
+            answers.color.text = document.getElementById("colorInput").value.trim();
+            answers.color.adjs = [
+                document.getElementById("colorAdj1").value.trim(),
+                document.getElementById("colorAdj2").value.trim(),
+                document.getElementById("colorAdj3").value.trim()
+            ].filter(Boolean);
+
+            answers.animal.text = document.getElementById("animalInput").value.trim();
+            answers.animal.adjs = [
+                document.getElementById("animalAdj1").value.trim(),
+                document.getElementById("animalAdj2").value.trim(),
+                document.getElementById("animalAdj3").value.trim()
+            ].filter(Boolean);
+
+            answers.water.text = document.getElementById("waterInput").value.trim();
+            answers.water.adjs = [
+                document.getElementById("waterAdj1").value.trim(),
+                document.getElementById("waterAdj2").value.trim(),
+                document.getElementById("waterAdj3").value.trim()
+            ].filter(Boolean);
+
+            // Chuyển sang màn Loading
+            switchPages('Loading');
+
+            // Cập nhật giao diện Kết quả ngầm
+            prepareResultScreen();
+
+            // Đợi 2.5 giây giả lập phân tích rồi mở kết quả
+            setTimeout(() => {
+                switchPages('Result');
+            }, 2500);
+        }
+
+        function prepareResultScreen() {
+            document.getElementById("resColorWord").innerText = answers.color.text.toUpperCase();
+            document.getElementById("resColorAdjs").innerText = answers.color.adjs.join(", ");
+            
+            document.getElementById("resAnimalWord").innerText = answers.animal.text.toUpperCase();
+            document.getElementById("resAnimalAdjs").innerText = answers.animal.adjs.join(", ");
+            
+            document.getElementById("resWaterWord").innerText = answers.water.text.toUpperCase();
+            document.getElementById("resWaterAdjs").innerText = answers.water.adjs.join(", ");
+
+            // Tìm màu sắc tương ứng để tạo vệt highlight
+            const splashHex = detectColorHex(answers.color.text);
+            document.documentElement.style.setProperty('--splash-color', splashHex);
+        }
+
+        // Dictionary ánh xạ từ khóa sang Hex
+        const colorDictionary = [
+            { words: ["đỏ", "red"], hex: "#ff6b6b" },
+            { words: ["cam", "orange"], hex: "#ff9f43" },
+            { words: ["vàng", "yellow"], hex: "#feca57" },
+            { words: ["lục", "lá", "green", "rêu"], hex: "#1dd1a1" },
+            { words: ["dương", "biển", "blue", "lơ", "xanh"], hex: "#48dbfb" },
+            { words: ["ngọc", "teal"], hex: "#00d2d3" },
+            { words: ["tím", "purple", "mận"], hex: "#f368e0" },
+            { words: ["hồng", "pink"], hex: "#ff9ff3" },
+            { words: ["nâu", "brown", "đất"], hex: "#c8d6e5" }, // Nâu dùng màu be/xám nhạt cho đẹp trên giấy
+            { words: ["đen", "black", "tối"], hex: "#576574" },
+            { words: ["trắng", "white", "bạc", "silver"], hex: "#c8d6e5" },
+            { words: ["xám", "grey", "gray"], hex: "#8395a7" }
+        ];
+
+        function detectColorHex(colorName) {
+            const str = colorName.toLowerCase();
+            for(let item of colorDictionary) {
+                for(let word of item.words) {
+                    if(str.includes(word)) {
+                        return item.hex;
+                    }
+                }
+            }
+            // Mặc định highlight màu vàng chanh (highlighter pen)
+            return "#fef08a"; 
+        }
+
+        function restartBook() {
+            // Reset form
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(i => i.value = '');
+            document.documentElement.style.setProperty('--splash-color', 'transparent');
+            hideError();
+            
+            // Quay về trang Intro
+            switchPages(0);
+        }
+    </script>
+</body>
+</html>

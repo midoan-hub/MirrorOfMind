@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --splash-color: #fef08a;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background-color: #faf7f2;
+    color: #2e2825;
+  }
+
+  #root {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* Các lớp font mềm mại hỗ trợ tiếng Việt trọn vẹn */
+.font-soft-title {
+  font-family: 'Mali', 'Itim', 'Playpen Sans', cursive, sans-serif;
+}
+
+.font-soft-body {
+  font-family: 'Nunito', 'Quicksand', sans-serif;
+}
+
+.font-soft-cursive {
+  font-family: 'Itim', 'Mali', cursive, sans-serif;
+}
+
+.font-soft-playpen {
+  font-family: 'Playpen Sans', 'Nunito', sans-serif;
+}
+
+.font-quicksand {
+  font-family: 'Quicksand', 'Nunito', sans-serif;
+}
+
+.font-caveat {
+  font-family: 'Caveat', cursive, sans-serif;
+}
+
+.font-patrick {
+  font-family: 'Patrick Hand', cursive, sans-serif;
+}
+
+/* Nút bấm nét vẽ tay mềm mại bo tròn */
+.btn-hand-soft {
+  border: 2px solid #2e2825;
+  border-radius: 255px 18px 225px 22px / 20px 225px 22px 255px;
+  background-color: #ffffff;
+  position: relative;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  box-shadow: 2px 3px 0px rgba(46, 40, 37, 0.12);
+}
+
+.btn-hand-soft:hover {
+  background-color: #fff9f0;
+  transform: rotate(-0.8deg) translateY(-2px);
+  border-radius: 20px 255px 22px 225px / 225px 20px 255px 22px;
+  box-shadow: 3px 5px 0px rgba(46, 40, 37, 0.16);
+}
+
+.btn-hand-soft:active {
+  transform: scale(0.97) translateY(1px);
+  box-shadow: 1px 1px 0px rgba(46, 40, 37, 0.1);
+}
+
+/* Nút chính nổi bật với nét vẽ tay */
+.btn-hand-primary {
+  background-color: #2e2825;
+  color: #faf7f2;
+  border: 2px solid #2e2825;
+  border-radius: 255px 20px 225px 18px / 18px 225px 20px 255px;
+  box-shadow: 3px 4px 0px rgba(46, 40, 37, 0.18);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-hand-primary:hover {
+  background-color: #1a1614;
+  color: #ffffff;
+  transform: rotate(0.8deg) translateY(-2px);
+  box-shadow: 4px 6px 0px rgba(46, 40, 37, 0.22);
+}
+
+.btn-hand-primary:active {
+  transform: scale(0.97) translateY(1px);
+  box-shadow: 1px 2px 0px rgba(46, 40, 37, 0.15);
+}
+
+/* Khung sổ tay viền nét vẽ tay tự nhiên */
+.box-notebook {
+  border: 2px solid #362f2b;
+  border-radius: 255px 28px 225px 26px / 24px 225px 26px 255px;
+  background-color: #ffffff;
+  position: relative;
+  box-shadow: 4px 6px 0px rgba(46, 40, 37, 0.08);
+}
+
+/* Ô nhập liệu đường kẻ mềm mại */
+.input-soft-doodle {
+  border: none;
+  border-bottom: 2px dashed #9c8e84;
+  background: transparent;
+  outline: none;
+  text-align: center;
+  padding: 6px 10px;
+  transition: all 0.25s ease;
+}
+
+.input-soft-doodle:focus {
+  border-bottom: 2.5px solid #2e2825;
+  transform: translateY(-2px);
+  background: rgba(255, 250, 240, 0.5);
+  border-radius: 8px 8px 0 0;
+}
+
+.input-soft-doodle::placeholder {
+  color: #b5aba4;
+}
+
+/* Vệt highlight bút dạ quang mềm mại */
+.highlighter-pen {
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+}
+
+.highlighter-pen::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: 12%;
+  height: 52%;
+  background-color: var(--splash-color, #fef08a);
+  opacity: 0.55;
+  z-index: -1;
+  border-radius: 255px 12px 225px 14px / 12px 225px 14px 255px;
+  transform: rotate(-1deg);
+  transition: background-color 0.8s ease, opacity 0.3s ease;
+}
+
+/* Hiệu ứng gợn sóng lắc nhẹ */
+@keyframes soft-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(0.8deg); }
+}
+
+.animate-soft-float {
+  animation: soft-float 4s ease-in-out infinite;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-1.5deg); }
+  50% { transform: rotate(1.5deg); }
+}
+
+.animate-wiggle {
+  animation: wiggle 3s ease-in-out infinite;
+}
+
+/* Băng dính Washi Tape trang trí */
+.washi-tape {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1.5deg);
+  width: 110px;
+  height: 24px;
+  background-color: rgba(254, 215, 170, 0.85);
+  border-left: 2px dashed rgba(217, 119, 6, 0.4);
+  border-right: 2px dashed rgba(217, 119, 6, 0.4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
