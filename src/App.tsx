@@ -443,13 +443,6 @@ export default function App() {
               </button>
             </div>
 
-            <div className="text-xs text-[#9a897b] flex items-center justify-center gap-3 pt-2">
-              <span>🌱 Bản ngã</span>
-              <span>•</span>
-              <span>🕊️ Bạn đời lý tưởng</span>
-              <span>•</span>
-              <span>🌊 Tình yêu</span>
-            </div>
           </div>
         )}
 
